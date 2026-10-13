@@ -64,11 +64,13 @@ define view entity Z_I_M_A_BOOK1
       @UI.identification: [{ position: 80 }]
       FlightPrice,
 
+@UI.identification: [{ position: 90 }]
       CurrencyCode,
+      CurrencyCode as currency,
       /* Associations */
       _carrier,
       _Connect,
       _Customer,
-      _travel    : redirected to parent z_i_m_a_travel1,
-      _booksuppl : redirected to composition child z_i_m_a_book_s1
+      _travel    : redirected to parent Z_I_M_A_TRAVEL1,
+      _booksuppl : redirected to composition child Z_I_M_A_BOOK_S1
 }
