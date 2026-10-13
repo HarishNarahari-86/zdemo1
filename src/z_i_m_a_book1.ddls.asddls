@@ -66,7 +66,6 @@ define view entity Z_I_M_A_BOOK1
 
 @UI.identification: [{ position: 90 }]
       CurrencyCode,
-      CurrencyCode as currency,
       /* Associations */
       _carrier,
       _Connect,
