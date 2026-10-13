@@ -39,24 +39,24 @@ CLASS lhc_z_i_m_travel1 IMPLEMENTATION.
 
     LOOP AT lt_travel ASSIGNING FIELD-SYMBOL(<fs_travel>).
 
-*      IF <fs_travel>-AgencyId IS INITIAL.
-*        APPEND VALUE #( %tky = <fs_travel>-%tky ) TO failed-travel.
-*
-*        APPEND VALUE #( %tky = <fs_travel>-%tky
-*                        %msg = new_message(
-*                                 id       = 'ZMESSAGE'
-*                                 number   = 001
-*                                 severity = if_abap_behv_message=>severity-error
-**                                 v1       =
-**                                 v2       =
-**                                 v3       =
-**                                 v4       =
-*                               )
-*                               %element-AgencyId = if_abap_behv=>mk-on
-*         ) TO reported-travel.
-*
-*
-*      ENDIF.
+      IF <fs_travel>-AgencyId IS INITIAL.
+        APPEND VALUE #( %tky = <fs_travel>-%tky ) TO failed-travel.
+
+        APPEND VALUE #( %tky = <fs_travel>-%tky
+                        %msg = new_message(
+                                 id       = 'ZMESSAGE'
+                                 number   = 001
+                                 severity = if_abap_behv_message=>severity-error
+*                                 v1       =
+*                                 v2       =
+*                                 v3       =
+*                                 v4       =
+                               )
+                               %element-AgencyId = if_abap_behv=>mk-on
+         ) TO reported-travel.
+
+
+      ENDIF.
       IF <fs_travel>-CustomerId IS INITIAL.
         APPEND VALUE #( %tky = <fs_travel>-%tky ) TO failed-travel.
 
