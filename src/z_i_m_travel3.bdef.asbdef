@@ -1,0 +1,60 @@
+managed implementation in class zbp_i_m_travel3 unique;
+strict ( 2 );
+
+define behavior for z_i_m_travel3 alias travel
+persistent table /dmo/travel
+lock master
+authorization master ( instance )
+etag master Lastchangedat
+{
+  create ( authorization : global );
+  update;
+  delete;
+  field ( readonly ) TravelId;
+  association _book { create; }
+
+
+  mapping for /dmo/travel{
+  AgencyId = agency_id;
+  BeginDate = begin_date;
+  BookingFee = booking_fee;
+  Createdat = createdat;
+  Createdby = createdby;
+  CurrencyCode = currency_code;
+  CustomerId = customer_id;
+  Description = description;
+  EndDate = end_date;
+  Lastchangedat = lastchangedat;
+  Lastchangedby = lastchangedby;
+  Status = status;
+  TotalPrice = total_price;
+
+  }
+
+}
+
+define behavior for z_i_m_book3 alias booking
+persistent table /dmo/booking
+lock dependent by _travel
+authorization dependent by _travel
+//etag master <field_name>
+{
+  update;
+  delete;
+  field ( readonly ) TravelId, BookingId;
+  association _travel;
+  association _suppliment { create; }
+}
+
+define behavior for z_i_m_book_s3 alias booksuppl
+persistent table /dmo/booksuppl_m
+lock dependent by _travel
+authorization dependent by _travel
+//etag master <field_name>
+{
+  update;
+  delete;
+  field ( readonly ) TravelId, BookingId, BookingSupplementId;
+  association _travel;
+  association _book;
+}
