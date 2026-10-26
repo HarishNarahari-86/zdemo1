@@ -1,0 +1,6 @@
+@EndUserText.label: 'service definition travel1'
+define service Z_I_M_A_TRAVEL1_sd1 {
+  expose Z_I_M_A_TRAVEL1;
+  expose Z_I_M_A_BOOK1;
+  expose Z_I_M_A_BOOK_S1;
+}

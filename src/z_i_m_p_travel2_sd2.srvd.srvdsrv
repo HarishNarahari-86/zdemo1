@@ -1,0 +1,11 @@
+@EndUserText.label: 'service definition Travel2'
+define service Z_I_M_P_TRAVEL2_sd2 {
+  expose z_i_m_p_travel2;
+  expose /DMO/I_Agency;
+  expose /DMO/I_Customer;
+  expose I_Currency;
+  expose /DMO/I_Travel_Status_VH_Text;
+  expose z_i_m_p_book2;
+  expose /DMO/I_Carrier;
+  expose /DMO/I_Connection;
+}

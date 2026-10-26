@@ -1,0 +1,12 @@
+@EndUserText.label: 'service definition travel1'
+define service Z_I_M_P_TRAVEL1_sd1 {
+  expose z_i_m_p_travel1;
+  expose /DMO/I_Agency;
+  expose /DMO/I_Customer;
+  expose z_i_m_p_book1;
+  expose /DMO/I_Carrier;
+  expose /DMO/I_Connection;
+  expose z_i_m_p_book_s1;
+  expose /DMO/I_Supplement;
+  expose /DMO/I_SupplementText;
+}

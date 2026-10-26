@@ -1,0 +1,10 @@
+@EndUserText.label: 'Travel Access Control3'
+@MappingRole: true
+define role ZC_TRAVEL3 {
+    grant
+        select
+            on
+                z_i_m_travel3
+                where AgencyId = '070001';
+                        
+}
