@@ -1,9 +1,11 @@
 managed implementation in class zbp_i_m_travel3 unique;
 strict ( 2 );
-
+with draft;
 define behavior for z_i_m_travel3 alias travel
 persistent table /dmo/travel
+draft table ztravel_draft1
 lock master
+total etag Lastchangedat
 authorization master ( instance )
 etag master Lastchangedat
 {
@@ -30,11 +32,16 @@ etag master Lastchangedat
   TotalPrice = total_price;
 
   }
-
+draft action Edit;
+draft action Resume;
+draft action Activate optimized;
+draft action Discard;
+draft determine action Prepare;
 }
 
 define behavior for z_i_m_book3 alias booking
 persistent table /dmo/booking
+draft table zbook_draft1
 lock dependent by _travel
 authorization dependent by _travel
 //etag master <field_name>
@@ -48,6 +55,7 @@ authorization dependent by _travel
 
 define behavior for z_i_m_book_s3 alias booksuppl
 persistent table /dmo/booksuppl_m
+draft table zbooksu_draft1
 lock dependent by _travel
 authorization dependent by _travel
 //etag master <field_name>

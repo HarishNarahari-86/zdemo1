@@ -1,0 +1,10 @@
+@EndUserText.label: 'service definition Travel4'
+define service Z_I_M_P_TRAVEL_sd4 {
+  expose z_i_m_p_travel4;
+  expose /DMO/I_Agency;
+  expose /DMO/I_Customer;
+  expose z_i_m_p_book4;
+  expose /DMO/I_Carrier;
+  expose /DMO/I_Connection;
+  expose z_i_m_p_book_s4;
+}

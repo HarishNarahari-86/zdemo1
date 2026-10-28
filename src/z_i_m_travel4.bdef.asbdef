@@ -1,0 +1,54 @@
+managed implementation in class zbp_i_m_travel4 unique;
+strict ( 2 );
+with draft;
+define behavior for z_i_m_travel4 alias travel
+persistent table /dmo/travel
+draft table ztravel_draft1
+lock master
+total etag lastchangedat
+authorization master ( instance )
+etag master lastchangedat
+early numbering
+
+{
+  create ( authorization : global );
+  update;
+  delete;
+  field ( readonly ) travel_id;
+  association _booking { create; }
+
+  draft action Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare;
+
+}
+
+define behavior for z_i_m_book4 alias booking
+persistent table /dmo/booking
+draft table zbook_draft1
+lock dependent by _travel
+authorization dependent by _travel
+//etag master <field_name>
+{
+  update;
+  delete;
+  field ( readonly ) travel_id, booking_id;
+  association _travel;
+  association _suppl { create; }
+}
+
+define behavior for z_i_m_book_s4 alias suppl
+persistent table /dmo/booksuppl_m
+draft table zbooksu_draft1
+lock dependent by _travel
+authorization dependent by _travel
+etag master LastChangedAt
+{
+  update;
+  delete;
+  field ( readonly ) TravelId, BookingId, BookingSupplementId;
+  association _travel;
+  association _booking;
+}
