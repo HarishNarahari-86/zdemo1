@@ -80,6 +80,7 @@ define root view entity z_i_m_p_travel4
       @UI.selectionField: [{ position: 40 }]
       @UI.lineItem: [{ position: 50 }]
       @UI.identification: [{ position: 90 }]
+      @Consumption.valueHelpDefinition: [{ entity: {name: '/DMO/I_Travel_Status_VH_Text',element: 'TravelStatus'} }]
       status,
 
       @UI.lineItem: [{ label: 'Copy Travel', position: 130, type: #FOR_ACTION, dataAction: 'copytravel'  }]

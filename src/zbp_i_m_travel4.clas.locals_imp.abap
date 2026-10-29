@@ -90,41 +90,43 @@ CLASS lhc_travel IMPLEMENTATION.
 
     READ ENTITIES OF z_i_m_travel4 IN LOCAL MODE
     ENTITY travel
-    FIELDS ( begin_Date end_date )
+    FIELDS ( begin_date end_date )
     WITH CORRESPONDING #( keys )
-    RESULT DATA(lt_Dates).
+    RESULT DATA(lt_travel_dates).
 
-    DATA : lt_begin_Date TYPE TABLE FOR UPDATE z_i_m_travel4.
+    DATA : lt_travel_update TYPE TABLE FOR UPDATE z_i_m_travel4.
 
-    LOOP AT lt_dates ASSIGNING FIELD-SYMBOL(<fs_dates>).
-      IF <fs_dates>-begin_date IS INITIAL.
+    LOOP AT lt_travel_Dates ASSIGNING FIELD-SYMBOL(<fs_travel_Date>).
 
-        lt_begin_Date = VALUE #( FOR keyval IN keys (
+      IF <fs_travel_Date>-begin_date IS INITIAL.
+
+        lt_travel_update = VALUE #( FOR keyval IN keys (
         %tky = keyval-%tky
         begin_date = cl_abap_context_info=>get_system_date( )
+        end_date = cl_abap_context_info=>get_system_date( ) + 30
         %control = VALUE #(
-        begin_date = if_abap_behv=>mk-on )
-
-         ) ).
-
+        begin_date = if_abap_behv=>mk-on
+        end_date = if_Abap_behv=>mk-on
+        )
+        )
+        ).
 
       ENDIF.
+
     ENDLOOP.
 
-    IF lt_begin_date IS NOT INITIAL.
+    IF lt_travel_update IS NOT INITIAL.
+
       MODIFY ENTITIES OF z_i_m_travel4 IN LOCAL MODE
       ENTITY travel
-      UPDATE FROM lt_begin_date
+      UPDATE FROM lt_travel_update
       MAPPED DATA(lt_map)
       FAILED DATA(lt_fail)
       REPORTED DATA(lt_report).
+
     ENDIF.
 
-
-
-
   ENDMETHOD.
-
 
 
 ENDCLASS.
