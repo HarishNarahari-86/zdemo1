@@ -24,6 +24,8 @@ CLASS lhc_travel DEFINITION INHERITING FROM cl_abap_behavior_handler.
        keys FOR travel~travel_dates.
     METHODS validate_fees FOR VALIDATE ON SAVE
        keys FOR travel~validate_fees.
+    METHODS get_instance_features FOR INSTANCE FEATURES
+      keys REQUEST requested_features FOR travel RESULT result.
     METHODS earlynumbering_cba_booking FOR NUMBERING
        entities FOR CREATE travel\_booking.
     METHODS earlynumbering_create FOR NUMBERING
@@ -232,6 +234,34 @@ CLASS lhc_travel IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
+
+
+  ENDMETHOD.
+
+  METHOD get_instance_features.
+
+
+    READ ENTITIES OF z_i_m_travel4 IN LOCAL MODE
+    ENTITY travel
+    FIELDS ( agency_id customer_id )
+    WITH CORRESPONDING #( keys )
+    RESULT DATA(lt_customer).
+
+
+    result = VALUE #( FOR ls_Customer IN lt_customer
+    (
+    %tky = ls_customer-%tky
+
+   %features-%field-customer_id = COND #( WHEN ls_customer-customer_id IS INITIAL THEN if_abap_behv=>fc-f-unrestricted
+   ELSE if_abap_behv=>fc-f-read_only )
+
+   %features-%field-agency_id = COND #( WHEN ls_customer-agency_id IS INITIAL THEN if_abap_behv=>fc-f-unrestricted
+   ELSE if_abap_behv=>fc-f-read_only )
+
+
+    )
+
+     ).
 
 
   ENDMETHOD.

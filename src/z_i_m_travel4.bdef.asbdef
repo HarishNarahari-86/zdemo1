@@ -15,6 +15,7 @@ early numbering
   update;
   delete;
   field ( readonly ) travel_id;
+  field ( features : instance ) customer_id, agency_id;
   association _booking { create; }
 
   draft action Edit;
