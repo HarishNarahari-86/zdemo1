@@ -22,6 +22,8 @@ CLASS lhc_travel DEFINITION INHERITING FROM cl_abap_behavior_handler.
        keys FOR ACTION travel~copytravel RESULT result.
     METHODS travel_dates FOR DETERMINE ON MODIFY
        keys FOR travel~travel_dates.
+    METHODS validate_fees FOR VALIDATE ON SAVE
+       keys FOR travel~validate_fees.
     METHODS earlynumbering_cba_booking FOR NUMBERING
        entities FOR CREATE travel\_booking.
     METHODS earlynumbering_create FOR NUMBERING
@@ -158,6 +160,76 @@ CLASS lhc_travel IMPLEMENTATION.
 
         ) TO mapped-booking.
       ENDLOOP.
+
+    ENDLOOP.
+
+
+  ENDMETHOD.
+
+  METHOD validate_fees.
+
+    READ ENTITIES OF z_i_m_travel4 IN LOCAL MODE
+    ENTITY travel
+    FIELDS ( booking_fee total_price )
+    WITH CORRESPONDING #( keys )
+    RESULT DATA(lt_fees).
+
+    LOOP AT lt_fees ASSIGNING FIELD-SYMBOL(<fs_fees>).
+
+      DATA(lv_failed) = abap_false.
+
+      IF <fs_fees>-booking_fee IS INITIAL.
+
+        lv_failed = abap_true.
+
+        APPEND VALUE #(
+           %tky = <fs_fees>-%tky
+          %msg = new_message(
+                   id       = 'ZMESSAGE'
+                   number   = 003
+                   severity = if_abap_behv_message=>severity-error
+*                   v1       =
+*                   v2       =
+*                   v3       =
+*                   v4       =
+                 )
+
+        %element-booking_fee = if_abap_behv=>mk-on
+        ) TO reported-travel
+        .
+
+
+      ENDIF.
+      IF <fs_fees>-total_price IS INITIAL OR <fs_fees>-booking_fee > <fs_fees>-total_price.
+
+        lv_failed = abap_true.
+        APPEND VALUE #(
+           %tky = <fs_fees>-%tky
+          %msg = new_message(
+                   id       = 'ZMESSAGE'
+                   number   = 004
+                   severity = if_abap_behv_message=>severity-error
+*                   v1       =
+*                   v2       =
+*                   v3       =
+*                   v4       =
+                 )
+
+        %element-total_price = if_abap_behv=>mk-on
+        ) TO reported-travel
+        .
+
+
+      ENDIF.
+
+      IF lv_failed = abap_true.
+        APPEND VALUE #(
+        %tky = <fs_fees>-%tky
+
+         ) TO failed-travel.
+
+
+      ENDIF.
 
     ENDLOOP.
 

@@ -86,7 +86,7 @@ define root view entity z_i_m_p_travel4
       _status.Text        as statustext,
       statuscriticality,
 
-      @UI.lineItem: [{ label: 'Copy Travel', position: 130, type: #FOR_ACTION, dataAction: 'copytravel'  }]
+      @UI.lineItem: [{ label: 'Copy Travel', position: 130, type: #FOR_ACTION, dataAction: 'copytravel'}]
       createdby,
       createdat,
       lastchangedby,

@@ -27,6 +27,8 @@ early numbering
 
   determination travel_dates on modify { create; field begin_date, end_date; }
 
+  validation validate_fees on save { create; field booking_fee, total_price; }
+
 }
 
 define behavior for z_i_m_book4 alias booking

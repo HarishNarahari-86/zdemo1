@@ -53,7 +53,6 @@ define view entity z_i_m_p_book4
       @UI.identification: [{ position: 65, label: 'Destination Airport' }]
       _connect.DestinationAirport as destAirport,
 
-
       @UI.identification: [{ position: 70 }]
       flight_date,
 
