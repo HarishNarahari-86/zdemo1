@@ -1,3 +1,15 @@
+CLASS lhc_booking DEFINITION INHERITING FROM cl_abap_behavior_handler.
+
+  PRIVATE SECTION.
+
+    METHODS earlynumbering_cba_Suppl FOR NUMBERING
+       entities FOR CREATE booking\_Suppl.
+
+ENDCLASS.
+
+
+
+
 CLASS lhc_travel DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
 
@@ -10,6 +22,8 @@ CLASS lhc_travel DEFINITION INHERITING FROM cl_abap_behavior_handler.
        keys FOR ACTION travel~copytravel RESULT result.
     METHODS travel_dates FOR DETERMINE ON MODIFY
        keys FOR travel~travel_dates.
+    METHODS earlynumbering_cba_booking FOR NUMBERING
+       entities FOR CREATE travel\_booking.
     METHODS earlynumbering_create FOR NUMBERING
        entities FOR CREATE travel.
 
@@ -128,5 +142,54 @@ CLASS lhc_travel IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD earlynumbering_cba_Booking.
+
+
+    LOOP AT entities ASSIGNING FIELD-SYMBOL(<entity>).
+      SELECT MAX( booking_id ) FROM z_i_m_book4 WHERE travel_id = @<entity>-travel_id INTO @DATA(lv_book_id).
+
+      LOOP AT <entity>-%target ASSIGNING FIELD-SYMBOL(<booking>).
+        APPEND VALUE #(
+        %cID = <booking>-%cid
+        %is_draft = <booking>-%is_draft
+        travel_id = <booking>-travel_id
+        booking_id = lv_book_id + 1
+
+        ) TO mapped-booking.
+      ENDLOOP.
+
+    ENDLOOP.
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS lhc_booking IMPLEMENTATION.
+
+  METHOD earlynumbering_cba_Suppl.
+
+
+    LOOP AT entities ASSIGNING FIELD-SYMBOL(<booking>).
+
+      SELECT MAX( BookingSupplementId ) FROM z_i_m_book_s4 WHERE TravelId = @<booking>-travel_id AND BookingId = @<booking>-booking_id
+      INTO @DATA(lV_suppliment).
+
+      LOOP AT <booking>-%target ASSIGNING FIELD-SYMBOL(<suppliment>).
+
+        APPEND VALUE #(
+        %cid = <suppliment>-%cid
+        %is_draft = <suppliment>-%is_draft
+        travelid = <suppliment>-TravelId
+        bookingid = <suppliment>-BookingId
+        BookingSupplementId = lv_suppliment + 1
+        ) TO mapped-suppl.
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+  ENDMETHOD.
 
 ENDCLASS.

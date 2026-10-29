@@ -4,10 +4,12 @@
 @Metadata.ignorePropagatedAnnotations: true
 define root view entity z_i_m_travel4
   as select from /dmo/travel as _travel
-  association [0..1] to /DMO/I_Agency   as _agency   on $projection.agency_id = _agency.AgencyID
-  association [1]    to /DMO/I_Customer as _customer on $projection.customer_id = _customer.CustomerID
+  association [0..1] to /DMO/I_Agency                as _agency   on  $projection.agency_id = _agency.AgencyID
+  association [1]    to /DMO/I_Customer              as _customer on  $projection.customer_id = _customer.CustomerID
+  association [1]    to /DMO/I_Travel_Status_VH_Text as _status   on  $projection.status = _status.TravelStatus
+                                                                  and _status.Language   = 'E'
 
-  composition [0..*] of z_i_m_book4     as _booking
+  composition [0..*] of z_i_m_book4                  as _booking
 {
   key travel_id,
       agency_id,
@@ -24,6 +26,13 @@ define root view entity z_i_m_travel4
       currency_code,
       description,
       status,
+      case status
+      when 'N' then 5
+      when 'X' then 1
+      when 'B' then 3
+      when 'P' then 2
+      else 0
+      end as statuscriticality,
       createdby,
       createdat,
       lastchangedby,
@@ -31,6 +40,6 @@ define root view entity z_i_m_travel4
 
       _agency,
       _customer,
-      _booking
+      _booking,
+      _status
 }
-

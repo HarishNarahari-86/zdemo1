@@ -3,6 +3,9 @@
 {
 "FROM":
 [
+"/DMO/I_CARRIER",
+"/DMO/I_CONNECTION",
+"/DMO/I_CUSTOMER",
 "Z_I_M_BOOK4"
 ],
 "ASSOCIATED":

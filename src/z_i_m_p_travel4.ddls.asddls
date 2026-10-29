@@ -78,10 +78,13 @@ define root view entity z_i_m_p_travel4
       description,
 
       @UI.selectionField: [{ position: 40 }]
-      @UI.lineItem: [{ position: 50 }]
-      @UI.identification: [{ position: 90 }]
+      @UI.lineItem: [{ position: 50, criticality: 'statuscriticality' }]
+      @UI.identification: [{ position: 90, criticality: 'statuscriticality' }]
       @Consumption.valueHelpDefinition: [{ entity: {name: '/DMO/I_Travel_Status_VH_Text',element: 'TravelStatus'} }]
+      @ObjectModel.text.element: [ 'statustext' ]
       status,
+      _status.Text        as statustext,
+      statuscriticality,
 
       @UI.lineItem: [{ label: 'Copy Travel', position: 130, type: #FOR_ACTION, dataAction: 'copytravel'  }]
       createdby,
@@ -92,5 +95,6 @@ define root view entity z_i_m_p_travel4
       /* Associations */
       _agency,
       _customer,
-      _booking : redirected to composition child z_i_m_p_book4
+      _booking : redirected to composition child z_i_m_p_book4,
+      _status
 }

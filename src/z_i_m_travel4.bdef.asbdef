@@ -34,6 +34,7 @@ persistent table /dmo/booking
 draft table zbook_draft1
 lock dependent by _travel
 authorization dependent by _travel
+early numbering
 //etag master <field_name>
 {
   update;
@@ -41,6 +42,7 @@ authorization dependent by _travel
   field ( readonly ) travel_id, booking_id;
   association _travel;
   association _suppl { create; }
+
 }
 
 define behavior for z_i_m_book_s4 alias suppl
@@ -49,6 +51,7 @@ draft table zbooksu_draft1
 lock dependent by _travel
 authorization dependent by _travel
 etag master LastChangedAt
+early numbering
 {
   update;
   delete;
