@@ -4,6 +4,10 @@ CLASS lhc_booking DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS earlynumbering_cba_Suppl FOR NUMBERING
        entities FOR CREATE booking\_Suppl.
+    METHODS fill_book_data FOR DETERMINE ON MODIFY
+       keys FOR booking~fill_book_data.
+    METHODS get_instance_features FOR INSTANCE FEATURES
+      keys REQUEST requested_features FOR booking RESULT result.
 
 ENDCLASS.
 
@@ -26,6 +30,8 @@ CLASS lhc_travel DEFINITION INHERITING FROM cl_abap_behavior_handler.
        keys FOR travel~validate_fees.
     METHODS get_instance_features FOR INSTANCE FEATURES
       keys REQUEST requested_features FOR travel RESULT result.
+    METHODS status FOR DETERMINE ON MODIFY
+       keys FOR travel~status.
     METHODS earlynumbering_cba_booking FOR NUMBERING
        entities FOR CREATE travel\_booking.
     METHODS earlynumbering_create FOR NUMBERING
@@ -64,6 +70,7 @@ CLASS lhc_travel IMPLEMENTATION.
   METHOD copytravel.
 
     DATA : lt_create TYPE TABLE FOR CREATE z_i_m_travel4.
+    DATA : lt_create1 TYPE TABLE FOR CREATE z_i_m_travel4.
 
     SELECT MAX( travel_id ) FROM z_i_m_travel4 INTO @DATA(lv_travel_id).
 
@@ -71,16 +78,25 @@ CLASS lhc_travel IMPLEMENTATION.
     FROM VALUE #( FOR keyval IN keys ( %key = keyval-%key
     %control-travel_id = if_abap_behv=>mk-on
     %control-agency_id = if_abap_behv=>mk-on
-    %control-customer_id = if_abap_behv=>mk-on ) )
+    %control-customer_id = if_abap_behv=>mk-on
+    %control-booking_fee = if_Abap_behv=>mk-on
+    %control-total_price = if_abap_behv=>mk-on
+    %control-description = if_Abap_behv=>mk-on ) )
     RESULT DATA(lt_travel).
 
     lt_create = VALUE #( FOR row IN lt_travel INDEX INTO idx (
-    %cid = |copy{ lv_travel_id }|
+    %cid = |row{ lv_travel_id }|
     agency_id = row-agency_id
     customer_id = row-customer_id
+    booking_fee = row-booking_fee
+    total_price = row-total_price
+    description = row-description
     %control = VALUE #(
     agency_id = if_abap_behv=>mk-on
     customer_id = if_abap_behv=>mk-on
+    booking_fee = if_Abap_behv=>mk-on
+    total_price = if_abap_behv=>mk-on
+    description = if_abap_behv=>mk-on
     )
     ) ).
 
@@ -91,7 +107,6 @@ CLASS lhc_travel IMPLEMENTATION.
     FAILED failed
     REPORTED reported.
 
-
     result = VALUE #( FOR source IN keys INDEX INTO idx
     LET new_cid = lt_create[ idx ]-%cid IN (
 
@@ -101,6 +116,7 @@ CLASS lhc_travel IMPLEMENTATION.
 
 
     ) ).
+
 
   ENDMETHOD.
 
@@ -266,31 +282,140 @@ CLASS lhc_travel IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD status.
+
+
+    READ ENTITIES OF z_i_m_travel4 IN LOCAL MODE
+    ENTITY travel
+    FIELDS ( status )
+    WITH CORRESPONDING #( keys )
+    RESULT DATA(lt_status).
+
+    DATA : lt_status_update TYPE TABLE FOR UPDATE z_i_m_travel4.
+
+    LOOP AT lt_Status INTO DATA(ls_status).
+      IF ls_status-status IS INITIAL.
+
+        lt_status_update = VALUE #(
+        ( %tky = ls_status-%tky
+        status = 'N'
+        %control = VALUE #( status = if_abap_behv=>mk-on ) )
+        ).
+
+      ENDIF.
+
+    ENDLOOP.
+
+    MODIFY ENTITIES OF z_i_m_travel4 IN LOCAL MODE
+    ENTITY travel
+    UPDATE FROM lt_status_update
+    MAPPED DATA(lt_mapped)
+    FAILED DATA(lt_failed)
+    REPORTED DATA(lt_report).
+
+
+  ENDMETHOD.
+
 ENDCLASS.
 
 CLASS lhc_booking IMPLEMENTATION.
 
   METHOD earlynumbering_cba_Suppl.
 
-
     LOOP AT entities ASSIGNING FIELD-SYMBOL(<booking>).
 
-      SELECT MAX( BookingSupplementId ) FROM z_i_m_book_s4 WHERE TravelId = @<booking>-travel_id AND BookingId = @<booking>-booking_id
-      INTO @DATA(lV_suppliment).
+      SELECT MAX( BookingSupplementId )
+        FROM z_i_m_book_s4
+        WHERE TravelId  = @<booking>-travel_id
+          AND BookingId = @<booking>-booking_id
+        INTO @DATA(lv_active_max).
 
-      LOOP AT <booking>-%target ASSIGNING FIELD-SYMBOL(<suppliment>).
+      SELECT MAX(  bookingsupplementid )
+        FROM zbooksu_draft1
+       WHERE TravelId  = @<booking>-travel_id
+         AND BookingId = @<booking>-booking_id
+        INTO @DATA(lv_draft_max).
+
+      DATA(lv_max_val) = nmax( val1 = lv_active_max
+                                  val2 = lv_draft_max ).
+
+
+      LOOP AT <booking>-%target ASSIGNING FIELD-SYMBOL(<supplement>).
 
         APPEND VALUE #(
-        %cid = <suppliment>-%cid
-        %is_draft = <suppliment>-%is_draft
-        travelid = <suppliment>-TravelId
-        bookingid = <suppliment>-BookingId
-        BookingSupplementId = lv_suppliment + 1
+          %cid                 = <supplement>-%cid
+          %is_draft            = <supplement>-%is_draft
+          travelid             = <booking>-travel_id
+          bookingid            = <booking>-booking_id
+          BookingSupplementId  = COND #( WHEN <supplement>-%is_draft = 1 THEN lv_max_val + 1
+          ELSE <supplement>-BookingSupplementId )
         ) TO mapped-suppl.
 
       ENDLOOP.
 
     ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD fill_book_data.
+
+    READ ENTITIES OF z_i_m_travel4 IN LOCAL MODE
+    ENTITY booking BY \_travel
+    FIELDS ( customer_id )
+    WITH CORRESPONDING #( keys )
+    RESULT DATA(lt_travel).
+
+    READ ENTITIES OF z_i_m_travel4 IN LOCAL MODE
+        ENTITY booking
+        FIELDS ( travel_id )
+        WITH CORRESPONDING #( keys )
+        RESULT DATA(lt_booking).
+
+    DATA : lt_book_update TYPE TABLE FOR UPDATE z_i_m_book4.
+
+    LOOP AT lt_booking ASSIGNING FIELD-SYMBOL(<fs_booking>).
+
+      READ TABLE lt_travel ASSIGNING FIELD-SYMBOL(<fs_travel>)
+        WITH KEY travel_id = <fs_booking>-travel_id.
+
+      IF sy-subrc EQ 0.
+
+        APPEND VALUE #(
+         %tky = <fs_booking>-%tky
+         customer_id = <fs_travel>-customer_id
+         %control-customer_id = if_abap_behv=>mk-on
+         ) TO lt_book_update.
+
+      ENDIF.
+
+    ENDLOOP.
+
+    IF lt_book_update IS NOT INITIAL.
+      MODIFY ENTITIES OF z_i_m_travel4 IN LOCAL MODE
+      ENTITY booking
+      UPDATE FROM lt_book_update
+      MAPPED DATA(lt_map)
+      FAILED DATA(lt_fail)
+      REPORTED DATA(lt_report).
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD get_instance_features.
+
+    READ ENTITIES OF z_i_m_travel4 IN LOCAL MODE
+    ENTITY booking BY \_travel
+    FIELDS ( customer_id )
+    WITH CORRESPONDING #( keys )
+    RESULT DATA(lt_result).
+
+    result = VALUE #( FOR keyval IN keys (
+        %tky = keyval-%tky
+        %features-%field-customer_id = COND #( WHEN line_exists( lt_result[ customer_id = 0 ]
+         ) THEN if_abap_behv=>fc-f-unrestricted
+         else if_abap_behv=>fc-f-read_only
+            )
+    ) ).
 
   ENDMETHOD.
 

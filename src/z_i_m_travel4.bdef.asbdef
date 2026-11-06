@@ -27,6 +27,7 @@ early numbering
   action copytravel result [1] $self;
 
   determination travel_dates on modify { create; field begin_date, end_date; }
+  determination status on modify { create; field status; }
 
   validation validate_fees on save { create; field booking_fee, total_price; }
 
@@ -43,8 +44,11 @@ early numbering
   update;
   delete;
   field ( readonly ) travel_id, booking_id;
+  field ( features : instance ) customer_id;
   association _travel;
   association _suppl { create; }
+
+  determination fill_book_data on modify { create; field travel_id; }
 
 }
 
